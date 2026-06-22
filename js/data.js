@@ -34,7 +34,7 @@ const CUSTOMERS = [
   {"company":"borse e accessori 蔡秀莲","country":"IT","city":"civitanova","lat":43.3074,"lng":13.7281,"region":"Marche","debt":18854.5,"sales":"Nico"},
   {"company":"LA GRUCCIA","country":"IT","sales":"Veronica"},
   {"company":"GIO TEX","country":"DE","city":"Neuss","lat":51.198,"lng":6.6917,"debt":15772.75,"sales":"Livio"},
-  {"company":"verofashion","country":"IT","city":"Bologna","lat":44.4949,"lng":11.3426,"region":"Emilia-Romagna","debt":3348.5,"sales":"Livio"},
+  {"company":"verofashion","country":"PL","debt":3348.5,"sales":"Livio"},
   {"company":"MIA S.R.L","country":"IT","sales":"Veronica"},
   {"company":"URBAN CHIC SRL","country":"IT","city":"Roma","lat":41.9028,"lng":12.4964,"region":"Lazio","debt":5504.7},
   {"company":"EBLA PARTNERS SRL","country":"RO","city":"BUCURESTI, SECTOR 6","debt":1980.0},

@@ -64,7 +64,7 @@ OVERRIDES = {
     "euroingro":               {"country":"IT","city":"Prato"},
     "Leivip":                  {"country":"IT","city":"Firenze"},
     "旭日箱包 Girasole（允浪）":   {"country":"IT","city":"Milano"},
-    "verofashion":             {"country":"IT","city":"Bologna"},   # “pologna” 当作 Bologna，待 Livio 确认
+    "verofashion":             {"country":"PL"},   # pologna = 波兰 Poland（Livio 确认）
     "BELLA LEGGENDA DI CHEN LIN": {"country":"IT"},          # 已有城市 Bari
     "MORE BAG":                {"country":"DE","city":"Neuss"},
     "CORTE DEGLI ARANCI":      {"country":"IT"},
