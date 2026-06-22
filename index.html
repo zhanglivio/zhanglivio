@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>欧洲客户地图看板 · Europe CRM Map</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="title">
+      <span class="logo">◧</span>
+      <span>欧洲客户地图 <small>Europe CRM Map</small></span>
+    </div>
+    <nav class="breadcrumb" id="breadcrumb"></nav>
+    <div class="legend" id="legend"></div>
+  </header>
+
+  <main id="stage">
+    <svg id="map"></svg>
+
+    <button class="back-btn" id="backBtn" hidden>← 返回</button>
+
+    <div class="loading" id="loading">加载地图中…</div>
+
+    <!-- 悬停客户卡片 -->
+    <div class="tooltip" id="tooltip" hidden></div>
+
+    <!-- 点击城市后的客户明细面板 -->
+    <aside class="panel" id="panel" hidden>
+      <div class="panel-head">
+        <h2 id="panelTitle">城市</h2>
+        <button id="panelClose">×</button>
+      </div>
+      <div class="panel-body" id="panelBody"></div>
+    </aside>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
