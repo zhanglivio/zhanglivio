@@ -66,10 +66,20 @@
   const money = (n, cur) => (cur || "€") + fmt(n);
 
   function contactClass(d) {
-    if (d == null) return "muted";
+    if (d == null || Number.isNaN(d)) return "muted";
     if (d <= THRESHOLDS.contact.ok) return "good";
     if (d <= THRESHOLDS.contact.warn) return "warn";
     return "bad";
+  }
+  // 取一个客户的“未联系天数”：优先联系日期，其次回购；都没有则 null
+  function coldDays(c) {
+    if (c.daysSinceContact != null) return +c.daysSinceContact;
+    if (c.daysSinceRepurchase != null) return +c.daysSinceRepurchase;
+    return null;
+  }
+  function maxCold(list) {
+    const vals = list.map(coldDays).filter((v) => v != null && !Number.isNaN(v));
+    return vals.length ? Math.max(...vals) : null;
   }
   function debtClass(a) {
     if (a <= THRESHOLDS.debt.ok) return "good";
@@ -87,7 +97,8 @@
     }
     if (activeLens === "cold") {
       if (!list.length) return { value: -1, text: "无客户", fill: getCss("--neutral"), gap: false, cls: "muted", empty: true };
-      const v = d3.max(list, (c) => +c.daysSinceContact || +c.daysSinceRepurchase || 0);
+      const v = maxCold(list);
+      if (v == null) return { value: -1, text: "无日期", fill: getCss("--neutral"), gap: false, cls: "muted", empty: true };
       const cls = contactClass(v);
       return { value: v, text: v + "天", fill: CLR[cls] || getCss("--neutral"), gap: false, cls };
     }
@@ -269,8 +280,8 @@
   function markerColor(list) {
     if (!list.length) return getCss("--neutral");
     if (activeLens === "debt") return CLR[debtClass(d3.sum(list, (c) => +c.debt || 0))];
-    // density 也按冷热给点颜色，方便扫视
-    const worst = d3.max(list, (c) => +c.daysSinceContact || +c.daysSinceRepurchase || 0);
+    const worst = maxCold(list);
+    if (worst == null) return getCss("--accent"); // 有客户但无日期：中性蓝
     return CLR[contactClass(worst)];
   }
 
@@ -285,21 +296,25 @@
     }
     const shown = list.slice(0, 8);
     const rows = shown.map((c) => {
-      const dc = (c.daysSinceContact != null) ? +c.daysSinceContact : +c.daysSinceRepurchase;
+      const dc = coldDays(c);
       const ccls = contactClass(dc);
+      const coldPill = dc == null
+        ? `<span class="pill cold">无联系日期</span>`
+        : `<span class="pill cold ${ccls === "good" ? "ok" : ccls === "bad" ? "bad" : ""}">${dc}天未联系</span>`;
       return `<div class="tt-row">
         <span class="tt-name">${escapeHtml(c.company)}</span>
         <span class="tt-meta">
-          <span class="pill cold ${ccls === "good" ? "ok" : ccls === "bad" ? "bad" : ""}">${dc}天未联系</span>
+          ${coldPill}
           <span class="pill debt ${(+c.debt) ? "" : "zero"}">欠 ${money(c.debt, c.currency)}</span>
         </span></div>`;
     }).join("");
     const more = list.length > shown.length
       ? `<div class="tt-row" style="justify-content:center;color:var(--muted)">…共 ${list.length} 个，点击查看</div>` : "";
     const totalDebt = d3.sum(list, (c) => +c.debt || 0);
-    const maxCold = d3.max(list, (c) => +c.daysSinceContact || +c.daysSinceRepurchase || 0);
+    const mc = maxCold(list);
+    const coldTxt = mc == null ? "无联系日期数据" : `最久未联系 ${mc} 天`;
     tooltip.html(`<div class="tt-head">${escapeHtml(title)} · <span class="count">${list.length} 个客户</span></div>
-      <div class="tt-sub">最久未联系 ${maxCold} 天 · 合计欠款 ${money(totalDebt)}</div>${rows}${more}`);
+      <div class="tt-sub">${coldTxt} · 合计欠款 ${money(totalDebt)}</div>${rows}${more}`);
     tooltip.node().hidden = false; positionTooltip(event);
   }
   function positionTooltip(event) {
@@ -325,6 +340,10 @@
       <span>欠款 <b>${money(totalDebt)}</b></span></div>`;
 
     let html = stat;
+    // 顶层提示未定位客户
+    if (nav.length === 1 && typeof META !== "undefined" && META.unplaced) {
+      html += `<div class="ins-stat" style="color:var(--warn)">⚠ 另有 <b>${META.unplaced}</b> 个客户缺国家信息未上图（含欠款 ${money(META.unplacedDebt)}）</div>`;
+    }
 
     if (activeLens === "density") {
       // 空白区（机会）+ 客户最多
@@ -335,11 +354,11 @@
         item(it, `<span class="vv">${it.list.length}</span>`)));
     } else if (activeLens === "cold") {
       // 最久未联系（要维护）
-      const ranked = withCust.map((it) => ({
-        it, v: d3.max(it.list, (c) => +c.daysSinceContact || +c.daysSinceRepurchase || 0),
-      })).sort((a, b) => b.v - a.v);
+      const ranked = withCust.map((it) => ({ it, v: maxCold(it.list) }))
+        .filter((x) => x.v != null).sort((a, b) => b.v - a.v);
+      const emptyMsg = ranked.length ? "" : "本数据没有“最后联系/下单日期”，此视角暂无数据。导入带日期的表后即可点亮。";
       html += section("❄️ 最久未联系 · 去维护", ranked.slice(0, 15).map(({ it, v }) =>
-        item(it, `<span class="vv ${contactClass(v)}">${v}天</span>`)), "暂无客户数据");
+        item(it, `<span class="vv ${contactClass(v)}">${v}天</span>`)), emptyMsg);
     } else {
       // 欠款最高
       const ranked = withCust.map((it) => ({ it, v: d3.sum(it.list, (c) => +c.debt || 0) }))
@@ -371,16 +390,19 @@
     panelTitle.textContent = city + " · " + list.length + " 个客户";
     const sorted = list.slice().sort((a, b) => worstScore(b) - worstScore(a));
     panelBody.innerHTML = sorted.map((c) => {
-      const dc = (c.daysSinceContact != null) ? +c.daysSinceContact : +c.daysSinceRepurchase;
-      const ccls = contactClass(dc), dcls = debtClass(+c.debt);
+      const dc = coldDays(c);
+      const ccls = contactClass(dc), dcls = debtClass(+c.debt || 0);
       const alert = (ccls === "bad" || dcls === "bad") ? " alert" : "";
+      const dcTxt = dc == null ? "—" : dc;
+      const rpTxt = c.daysSinceRepurchase != null ? c.daysSinceRepurchase : "—";
       return `<div class="cust-card${alert}">
         <div class="name">${escapeHtml(c.company)}</div>
         <div class="metrics">
-          <div class="metric"><div class="label">未联系天数</div><div class="value ${ccls}">${dc}<small style="font-size:12px"> 天</small></div></div>
-          <div class="metric"><div class="label">未回购天数</div><div class="value ${contactClass(+c.daysSinceRepurchase)}">${c.daysSinceRepurchase != null ? c.daysSinceRepurchase : "—"}<small style="font-size:12px"> 天</small></div></div>
+          <div class="metric"><div class="label">未联系天数</div><div class="value ${ccls}">${dcTxt}<small style="font-size:12px"> 天</small></div></div>
+          <div class="metric"><div class="label">未回购天数</div><div class="value ${contactClass(c.daysSinceRepurchase != null ? +c.daysSinceRepurchase : null)}">${rpTxt}<small style="font-size:12px"> 天</small></div></div>
           <div class="metric"><div class="label">欠款</div><div class="value ${dcls}">${money(c.debt, c.currency)}</div></div>
         </div>
+        ${c.sales ? `<div class="sub">👤 专属销售：${escapeHtml(c.sales)}</div>` : ""}
         ${c.note ? `<div class="sub">📌 ${escapeHtml(c.note)}</div>` : ""}
       </div>`;
     }).join("");
