@@ -1480,12 +1480,8 @@ const THRESHOLDS = {
 };
 
 const MAP_CONFIG = {
-  europeGeoJSON:
-    "https://cdn.jsdelivr.net/gh/leakyMirror/map-of-europe@master/GeoJSON/europe.geojson",
+  europeGeoJSON: "assets/europe.geojson",
   regionSources: {
-    IT: {
-      url: "https://cdn.jsdelivr.net/gh/openpolis/geojson-italy@master/geojson/limits_IT_regions.geojson",
-      nameProp: "reg_name",
-    },
+    IT: { url: "assets/italy-regions.geojson", nameProp: "reg_name" },
   },
 };

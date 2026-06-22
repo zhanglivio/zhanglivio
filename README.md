@@ -20,7 +20,11 @@
 
 ## 怎么打开
 
-浏览器直接打开 `index.html`（需要联网，地图边界从公共 CDN 加载；客户数据全在本地，不上传）。
+**在线版**：推送到 `claude/status-check-bhwrwt` 分支后，GitHub Actions 会自动部署到 GitHub Pages，
+打开 Actions 里 “Deploy to GitHub Pages” 任务输出的网址即可（手机/电脑都能用）。
+
+**本地版**：D3 与地图数据已全部打包进仓库（`assets/`），不再依赖外网 CDN。
+因为浏览器对 `file://` 读取本地 json 有限制，需起个小服务：
 
 ```bash
 python3 -m http.server 8080   # 然后访问 http://localhost:8080
