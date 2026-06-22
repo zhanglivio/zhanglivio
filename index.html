@@ -3,16 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>欧洲客户地图看板 · Europe CRM Map</title>
+  <title>欧洲客户经营雷达 · Europe Coverage Radar</title>
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
   <header class="topbar">
     <div class="title">
       <span class="logo">◧</span>
-      <span>欧洲客户地图 <small>Europe CRM Map</small></span>
+      <span>欧洲客户经营雷达 <small>Coverage Radar</small></span>
     </div>
     <nav class="breadcrumb" id="breadcrumb"></nav>
+
+    <!-- 视角（透镜）切换 -->
+    <div class="lens-switch" id="lensSwitch">
+      <button data-lens="density" class="active">客户密度</button>
+      <button data-lens="cold">久未联系</button>
+      <button data-lens="debt">欠款</button>
+    </div>
     <div class="legend" id="legend"></div>
   </header>
 
@@ -20,6 +27,15 @@
     <svg id="map"></svg>
 
     <button class="back-btn" id="backBtn" hidden>← 返回</button>
+
+    <!-- 左侧洞察排行榜：空白区 + 最冷区 -->
+    <aside class="insights" id="insights">
+      <div class="ins-head">
+        <span id="insTitle">洞察</span>
+        <button id="insToggle" title="收起/展开">◀</button>
+      </div>
+      <div class="ins-body" id="insBody"></div>
+    </aside>
 
     <div class="loading" id="loading">加载地图中…</div>
 
