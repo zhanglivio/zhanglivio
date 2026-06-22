@@ -49,6 +49,33 @@ IT_REGION = {
 
 def norm(s): return re.sub(r"\s+"," ",str(s).strip()).lower()
 
+# ---- 人工修正：有欠款但缺国家的客户，由 Livio 提供 ----
+#   key = Excel 中的客户名字（精确匹配）; 值 = {国家, 城市(可选)}
+OVERRIDES = {
+    "Z group 2022":            {"country":"IT","city":"Padova"},
+    "GLORIA FASHION GMBH":     {"country":"DE"},
+    "芳芳围巾":                  {"country":"IT","city":"Prato"},
+    "GaveLux":                 {"country":"IT","city":"Firenze"},
+    "PELLETTERIA ELMAR SRL":   {"country":"IT"},            # 已有城市 Monteprandone
+    "GIO TEX":                 {"country":"DE","city":"Neuss"},
+    "FASHION MARKET / new dress": {"country":"IT","city":"Roma"},
+    "Kay group":               {"country":"IT"},            # 已有城市 Funo di Argelato
+    "URBAN CHIC SRL":          {"country":"IT","city":"Roma"},
+    "euroingro":               {"country":"IT","city":"Prato"},
+    "Leivip":                  {"country":"IT","city":"Firenze"},
+    "旭日箱包 Girasole（允浪）":   {"country":"IT","city":"Milano"},
+    "verofashion":             {"country":"IT","city":"Bologna"},   # “pologna” 当作 Bologna，待 Livio 确认
+    "BELLA LEGGENDA DI CHEN LIN": {"country":"IT"},          # 已有城市 Bari
+    "MORE BAG":                {"country":"DE","city":"Neuss"},
+    "CORTE DEGLI ARANCI":      {"country":"IT"},
+    "金华":                     {"country":"GR","city":"Thessaloniki"},  # el saloniki
+    "GB":                      {"country":"HR"},             # croatia
+    "neshika":                 {"country":"BE"},             # belgio
+    "ADDIO MAGRE wtp 现金打posta": {"country":"IT","city":"Napoli"},
+    "Gianni samoiedo":         {"country":"IT","city":"Firenze"},
+    "- JackyJustin.de 安 张先生": {"country":"DE","city":"Neuss"},
+}
+
 def main(path):
     ws = openpyxl.load_workbook(path, read_only=True, data_only=True)["Sheet1"]
     rows=[r for r in ws.iter_rows(min_row=3, values_only=True) if r and r[0] and str(r[0]).strip()]
@@ -74,6 +101,10 @@ def main(path):
     placed=[]; unplaced=0; unplaced_debt=0.0
     for r in rows:
         co=country(r); name=str(r[0]).strip(); cy=city(r); d=debt(r); sales=(str(r[1]).strip() if r[1] else None)
+        ov=OVERRIDES.get(name)
+        if ov:
+            co=ov.get("country") or co
+            cy=ov.get("city") or cy
         if not co:
             unplaced+=1; unplaced_debt+=d; continue
         rec={"company":name,"country":co}
