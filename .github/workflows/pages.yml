@@ -1,8 +1,9 @@
 name: Deploy to GitHub Pages
 
+# 仅手动触发：仓库所有者在 Settings→Pages 把 Source 设为 “GitHub Actions” 后，
+# 可在 Actions 页点 “Run workflow” 部署。若用更简单的 “Deploy from a branch”
+# 方式（推荐），则无需本工作流。
 on:
-  push:
-    branches: [claude/status-check-bhwrwt]
   workflow_dispatch:
 
 permissions:
