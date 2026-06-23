@@ -236,7 +236,9 @@
     gRegions.selectAll("path").classed("dimmed", (n) => n !== feature);
     gRegions.selectAll(".feature-label").remove();
     fitTo(feature, 750);
-    renderCities(custByRegion(regionName), feature, regionName + " · 各城市");
+    const list = custByRegion(regionName);
+    renderCities(list, feature, regionName + " · 各城市");
+    openPanel(regionName, list);   // 进入大区即列出该区全部客户
   }
 
   function renderCitiesForCountry(iso, feature) {
