@@ -20,15 +20,14 @@
 
 ## 怎么打开
 
-**在线版**：推送到 `claude/status-check-bhwrwt` 分支后，GitHub Actions 会自动部署到 GitHub Pages，
-打开 Actions 里 “Deploy to GitHub Pages” 任务输出的网址即可（手机/电脑都能用）。
+**本地（最简单）**：直接**双击 `index.html`** 即可。D3、地图边界、客户数据全部内联打包，
+无需联网、无需起服务器。把整个文件夹拷到任意电脑都能用。
 
-**本地版**：D3 与地图数据已全部打包进仓库（`assets/`），不再依赖外网 CDN。
-因为浏览器对 `file://` 读取本地 json 有限制，需起个小服务：
+**在线版**：推送到 `claude/status-check-bhwrwt` 分支后，在仓库 Settings→Pages
+开启（Deploy from a branch）即得到网址，手机/电脑都能打开。
 
-```bash
-python3 -m http.server 8080   # 然后访问 http://localhost:8080
-```
+> 数据是怎么内联的：`assets/*.geojson.js` 由 `tools/make_inline_assets.py` 生成，
+> 把边界写成全局变量；`js/app.js` 优先读这些变量，读不到才回退 `fetch`。
 
 ## 怎么操作
 

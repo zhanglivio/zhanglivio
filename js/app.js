@@ -127,7 +127,7 @@
   // ===================================================================
   //  加载欧洲底图
   // ===================================================================
-  fetchJSON(MAP_CONFIG.europeGeoJSON)
+  loadGeo(MAP_CONFIG.europeGeoJSON, MAP_CONFIG.europeGlobal)
     .then((geo) => {
       europeFeatures = geo.features;
       projection.fitSize([W, H], geo);
@@ -135,10 +135,15 @@
       loadingEl.hidden = true;
     })
     .catch((err) => {
-      loadingEl.textContent = "地图底图加载失败（检查网络 / CDN）：" + err.message;
+      loadingEl.textContent = "地图底图加载失败：" + err.message;
       console.error(err);
     });
 
+  // 优先用内联的全局变量（file:// 双击即可），否则回退到 fetch(url)
+  function loadGeo(url, globalVar) {
+    if (globalVar && window[globalVar]) return Promise.resolve(window[globalVar]);
+    return fetchJSON(url);
+  }
   function fetchJSON(url) {
     return fetch(url).then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); });
   }
@@ -195,7 +200,7 @@
 
     const loadRegions = regionFeaturesCache[iso]
       ? Promise.resolve(regionFeaturesCache[iso])
-      : fetchJSON(cfg.url).then((geo) => (regionFeaturesCache[iso] = geo.features));
+      : loadGeo(cfg.url, cfg.globalVar).then((geo) => (regionFeaturesCache[iso] = geo.features));
     loadRegions.then((feats) => renderRegions(iso, cfg, feats))
       .catch((err) => { console.error(err); renderCitiesForCountry(iso, d); });
   }

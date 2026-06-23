@@ -146,9 +146,12 @@ const THRESHOLDS = {{
 }};
 
 const MAP_CONFIG = {{
+  // globalVar：内联数据（assets/*.geojson.js）的全局变量名，使 file:// 双击即可运行；
+  // url 作为联网时的回退。
   europeGeoJSON: "assets/europe.geojson",
+  europeGlobal: "__EUROPE_GEOJSON__",
   regionSources: {{
-    IT: {{ url: "assets/italy-regions.geojson", nameProp: "reg_name" }},
+    IT: {{ url: "assets/italy-regions.geojson", globalVar: "__IT_REGIONS_GEOJSON__", nameProp: "reg_name" }},
   }},
 }};
 """
