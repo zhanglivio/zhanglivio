@@ -86,7 +86,7 @@
     if (a <= THRESHOLDS.debt.warn) return "warn";
     return "bad";
   }
-  const CLR = { good: "#36c98e", warn: "#f5b942", bad: "#ff5c6c" };
+  const CLR = { good: "#d2d2d2", warn: "#898989", bad: "#2a2a2a" };
 
   // 取一组客户的“代表值”和颜色（按当前视角）
   function lensCell(list, densityScale) {
@@ -117,7 +117,7 @@
     const maxC = d3.max(feats, (f) => custFn(f).length) || 1;
     const dScale = d3.scaleSequential()
       .domain([0, Math.max(2, maxC)])
-      .interpolator(d3.interpolateRgb("#23365e", "#4da3ff"));
+      .interpolator(d3.interpolateRgb("#dcdcdc", "#1c1c1c"));   // 浅灰=少，深灰=多
     selection.each(function (f) {
       const cell = lensCell(custFn(f), dScale);
       d3.select(this).attr("fill", cell.fill).classed("gap", !!cell.gap);
@@ -281,7 +281,7 @@
     if (!list.length) return getCss("--neutral");
     if (activeLens === "debt") return CLR[debtClass(d3.sum(list, (c) => +c.debt || 0))];
     const worst = maxCold(list);
-    if (worst == null) return getCss("--accent"); // 有客户但无日期：中性蓝
+    if (worst == null) return "#9a9a9a"; // 有客户但无日期：中性灰
     return CLR[contactClass(worst)];
   }
 
@@ -510,9 +510,9 @@
   function updateLegend() {
     const L = document.getElementById("legend");
     if (activeLens === "density") {
-      L.innerHTML = `<span><span class="dot" style="background:var(--gap-fill);border:1px dashed var(--bad)"></span>无客户·待开发</span>
-        <span><span class="dot" style="background:#23365e"></span>少</span>
-        <span><span class="dot" style="background:#4da3ff"></span>多</span>`;
+      L.innerHTML = `<span><span class="dot" style="background:#fff;border:1px dashed #999"></span>无客户·待开发</span>
+        <span><span class="dot" style="background:#dcdcdc"></span>少</span>
+        <span><span class="dot" style="background:#1c1c1c"></span>多</span>`;
     } else if (activeLens === "cold") {
       L.innerHTML = `<span><span class="dot" style="background:${CLR.good}"></span>≤${THRESHOLDS.contact.ok}天</span>
         <span><span class="dot" style="background:${CLR.warn}"></span>≤${THRESHOLDS.contact.warn}天</span>
