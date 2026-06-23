@@ -248,13 +248,13 @@
   function renderCities(custList, parentFeature, insLabel) {
     loadingEl.hidden = true;
     gCities.selectAll("*").remove();
-    const byCity = d3.group(custList, (c) => c.city || "未知城市");
+    const byCity = d3.group(custList, (c) => norm(c.city || "未知城市"));  // 忽略大小写/空格合并
     const fallback = parentFeature ? path.centroid(parentFeature) : [W / 2, H / 2];
 
-    const cities = Array.from(byCity, ([city, list]) => {
+    const cities = Array.from(byCity, ([key, list]) => {
       const withCoord = list.find((c) => c.lat != null && c.lng != null);
       const xy = withCoord ? projection([+withCoord.lng, +withCoord.lat]) : fallback;
-      return { city, list, x: xy[0], y: xy[1] };
+      return { city: titleCase(list[0].city || "未知城市"), list, x: xy[0], y: xy[1] };
     });
 
     const g = gCities.selectAll(".city").data(cities, (d) => d.city).join("g")
@@ -506,6 +506,10 @@
       .style("font-size", (11 / currentK) + "px").text(nameFn);
   }
   function clearLayers() { gCountries.selectAll("*").remove(); gRegions.selectAll("*").remove(); gCities.selectAll("*").remove(); }
+  // 城市名规范显示：首字母大写（中文不受影响）
+  function titleCase(s) {
+    return (s || "").toString().toLowerCase().replace(/\b[a-z]/g, (m) => m.toUpperCase());
+  }
   function escapeHtml(s) { return (s || "").toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
 
   // 视角切换
