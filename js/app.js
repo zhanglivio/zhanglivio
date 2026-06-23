@@ -179,6 +179,8 @@
   //  LEVEL 1 —— 国家
   // ===================================================================
   function enterCountry(d) {
+    const cur = nav[nav.length - 1];
+    if (cur && cur.type === "country" && cur.feature === d) return; // 已在该国，避免重复入栈
     const iso = isoOf(d);
     nav.push({ type: "country", label: nameOf(d), feature: d, iso2: iso });
     hideTooltip();
@@ -226,6 +228,8 @@
   //  LEVEL 2 —— 大区 → 城市
   // ===================================================================
   function enterRegion(feature, regionName) {
+    const cur = nav[nav.length - 1];
+    if (cur && cur.type === "region" && cur.feature === feature) return; // 已在该大区，避免重复入栈
     nav.push({ type: "region", label: regionName, feature });
     hideTooltip();
     syncChrome();
@@ -240,6 +244,7 @@
   }
 
   function renderCities(custList, parentFeature, insLabel) {
+    loadingEl.hidden = true;
     gCities.selectAll("*").remove();
     const byCity = d3.group(custList, (c) => c.city || "未知城市");
     const fallback = parentFeature ? path.centroid(parentFeature) : [W / 2, H / 2];
@@ -255,7 +260,8 @@
       .attr("transform", (d) => `translate(${d.x},${d.y})`)
       .on("mousemove", (e, d) => renderTooltip(e, d.city, d.list))
       .on("mouseleave", hideTooltip)
-      .on("click", (e, d) => openPanel(d.city, d.list));
+      .on("click", (e, d) => { e.stopPropagation(); openPanel(d.city, d.list); });
+    g.append("circle").attr("class", "hit");   // 透明大命中区，保证好点
     g.append("circle").attr("class", "ring");
     g.append("circle").attr("class", "core");
     g.append("text").attr("class", "city-label").text((d) => d.city);
@@ -270,6 +276,8 @@
 
   function rescaleCities() {
     const r = 6 / currentK, fz = 11 / currentK, off = 10 / currentK;
+    gCities.selectAll(".city .hit").attr("r", 16 / currentK)
+      .attr("fill", "transparent").style("pointer-events", "all");
     gCities.selectAll(".city .ring").attr("r", r + 4 / currentK)
       .attr("stroke", (d) => markerColor(d.list)).attr("stroke-width", 2 / currentK);
     gCities.selectAll(".city .core").attr("r", r)
